@@ -26,7 +26,9 @@ export async function createMilestone(shop, data, graphql) {
   const milestone = await prisma.giftMilestone.create({
     data: { shop, ...data },
   });
-  await syncMetafield(shop, graphql);
+  await syncMetafield(shop, graphql).catch((err) =>
+    console.error("Metafield sync failed (create):", err),
+  );
   return milestone;
 }
 
@@ -38,7 +40,9 @@ export async function updateMilestone(id, shop, data, graphql) {
     where: { id },
     data,
   });
-  await syncMetafield(shop, graphql);
+  await syncMetafield(shop, graphql).catch((err) =>
+    console.error("Metafield sync failed (update):", err),
+  );
   return milestone;
 }
 
@@ -47,7 +51,9 @@ export async function updateMilestone(id, shop, data, graphql) {
  */
 export async function deleteMilestone(id, shop, graphql) {
   await prisma.giftMilestone.delete({ where: { id } });
-  await syncMetafield(shop, graphql);
+  await syncMetafield(shop, graphql).catch((err) =>
+    console.error("Metafield sync failed (delete):", err),
+  );
 }
 
 /**
@@ -55,6 +61,22 @@ export async function deleteMilestone(id, shop, graphql) {
  */
 export async function deleteAllMilestones(shop) {
   await prisma.giftMilestone.deleteMany({ where: { shop } });
+}
+
+/**
+ * Get the shop's GID by querying the Admin API.
+ */
+async function getShopId(graphql) {
+  const response = await graphql(
+    `#graphql
+    query ShopId {
+      shop {
+        id
+      }
+    }`,
+  );
+  const { data } = await response.json();
+  return data.shop.id;
 }
 
 /**
@@ -73,6 +95,8 @@ export async function syncMetafield(shop, graphql) {
       giftVariantId: m.giftVariantId,
     })),
   );
+
+  const shopId = await getShopId(graphql);
 
   const response = await graphql(
     `#graphql
@@ -93,11 +117,11 @@ export async function syncMetafield(shop, graphql) {
       variables: {
         metafields: [
           {
-            namespace: "$app:gift_milestones",
+            namespace: "gift_milestones",
             key: "rules",
             type: "json",
             value: rulesJson,
-            ownerId: `gid://shopify/Shop`,
+            ownerId: shopId,
           },
         ],
       },
@@ -107,7 +131,6 @@ export async function syncMetafield(shop, graphql) {
   const { data } = await response.json();
   if (data?.metafieldsSet?.userErrors?.length > 0) {
     console.error("Metafield sync errors:", data.metafieldsSet.userErrors);
-    throw new Error("Failed to sync milestone rules to metafield");
   }
 
   return data;
