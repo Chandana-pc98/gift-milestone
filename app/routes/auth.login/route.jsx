@@ -1,5 +1,6 @@
 import { json } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
+import { useState } from "react";
 import {
   AppProvider,
   Button,
@@ -10,13 +11,14 @@ import {
   TextField,
 } from "@shopify/polaris";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
+import polarisEn from "@shopify/polaris/locales/en.json";
 import { login } from "../../shopify.server.js";
 
 export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
 export const loader = async ({ request }) => {
   const errors = login(request);
-  return json({ errors, polarisTranslations: require("@shopify/polaris/locales/en.json") });
+  return json({ errors, polarisTranslations: polarisEn });
 };
 
 export const action = async ({ request }) => {
