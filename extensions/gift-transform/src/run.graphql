@@ -1,0 +1,36 @@
+query RunInput {
+  cart {
+    lines {
+      id
+      quantity
+      cost {
+        totalAmount {
+          amount
+          currencyCode
+        }
+      }
+      merchandise {
+        ... on ProductVariant {
+          id
+          product {
+            id
+          }
+        }
+      }
+      attribute(key: "_gift_milestone") {
+        value
+      }
+    }
+    cost {
+      totalAmount {
+        amount
+        currencyCode
+      }
+    }
+  }
+  cartTransform {
+    metafield(namespace: "$app:gift_milestones", key: "rules") {
+      value
+    }
+  }
+}

@@ -1,0 +1,6 @@
+scopes = "read_products,write_products,read_cart_transforms,write_cart_transforms"
+
+[app_proxy]
+url = "/api/gift-rules"
+subpath = "gift-milestones"
+prefix = "apps"

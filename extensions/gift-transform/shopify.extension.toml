@@ -1,0 +1,18 @@
+api_version = "2025-01"
+
+[[extensions]]
+name = "Gift Milestone Transform"
+handle = "gift-milestone-transform"
+type = "function"
+
+  [extensions.build]
+  command = ""
+  path = "dist/function.wasm"
+
+  [extensions.targeting]
+  target = "purchase.cart-transform.run"
+  input_query = "src/run.graphql"
+  export = "run"
+
+  [extensions.ui]
+  enable_create = false

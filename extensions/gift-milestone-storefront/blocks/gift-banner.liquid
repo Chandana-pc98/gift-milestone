@@ -1,0 +1,100 @@
+{% comment %}
+  Gift Milestone Banner — Theme App Block
+  Place this block in your cart template to show gift progress and auto-add gifts.
+{% endcomment %}
+
+<div
+  id="gift-milestone-banner"
+  data-proxy-url="/apps/gift-milestones"
+  data-message-earning="{{ block.settings.message_earning }}"
+  data-message-earned="{{ block.settings.message_earned }}"
+  style="display: none;"
+>
+  <div class="gift-milestone__inner">
+    <div class="gift-milestone__progress-wrap">
+      <div class="gift-milestone__progress-bar">
+        <div class="gift-milestone__progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+    <p class="gift-milestone__message"></p>
+  </div>
+</div>
+
+<style>
+  #gift-milestone-banner {
+    padding: 16px;
+    margin: 16px 0;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    border: 1px solid #bbf7d0;
+    font-family: inherit;
+  }
+
+  .gift-milestone__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .gift-milestone__progress-wrap {
+    width: 100%;
+  }
+
+  .gift-milestone__progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .gift-milestone__progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  .gift-milestone__message {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #166534;
+  }
+
+  #gift-milestone-banner.gift-earned {
+    background: linear-gradient(135deg, #fefce8, #fef9c3);
+    border-color: #fde047;
+  }
+
+  #gift-milestone-banner.gift-earned .gift-milestone__message {
+    color: #854d0e;
+  }
+
+  #gift-milestone-banner.gift-earned .gift-milestone__progress-fill {
+    background: linear-gradient(90deg, #eab308, #ca8a04);
+  }
+</style>
+
+{{ 'gift-milestone.js' | asset_url | script_tag }}
+
+{% schema %}
+{
+  "name": "Gift Milestone Banner",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "message_earning",
+      "label": "Progress message",
+      "default": "Add {{amount_remaining}} more to get a FREE gift!"
+    },
+    {
+      "type": "text",
+      "id": "message_earned",
+      "label": "Gift earned message",
+      "default": "You've earned a FREE gift!"
+    }
+  ]
+}
+{% endschema %}
