@@ -17,13 +17,13 @@ import { login } from "../../shopify.server.js";
 export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
 export const loader = async ({ request }) => {
-  const errors = login(request);
-  return json({ errors, polarisTranslations: polarisEn });
+  const errors = await login(request);
+  return json({ errors: errors || {}, polarisTranslations: polarisEn });
 };
 
 export const action = async ({ request }) => {
-  const errors = login(request);
-  return json({ errors });
+  const errors = await login(request);
+  return json({ errors: errors || {} });
 };
 
 export default function Auth() {
