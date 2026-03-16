@@ -16,9 +16,63 @@ import { ImageIcon } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server.js";
 import { getMilestones, deleteMilestone } from "../models/GiftMilestone.server.js";
 
+async function ensureScriptTag(admin) {
+  const appUrl = process.env.SHOPIFY_APP_URL;
+  const scriptSrc = `${appUrl}/api/storefront-script`;
+
+  // Check if ScriptTag already exists
+  const response = await admin.graphql(
+    `#graphql
+    query ScriptTags {
+      scriptTags(first: 10) {
+        edges {
+          node {
+            id
+            src
+          }
+        }
+      }
+    }`,
+  );
+  const { data } = await response.json();
+  const exists = data?.scriptTags?.edges?.some((e) => e.node.src === scriptSrc);
+
+  if (!exists) {
+    await admin.graphql(
+      `#graphql
+      mutation ScriptTagCreate($input: ScriptTagInput!) {
+        scriptTagCreate(input: $input) {
+          scriptTag {
+            id
+            src
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }`,
+      {
+        variables: {
+          input: {
+            src: scriptSrc,
+            displayScope: "ONLINE_STORE",
+          },
+        },
+      },
+    );
+  }
+}
+
 export const loader = async ({ request }) => {
-  const { session } = await authenticate.admin(request);
+  const { session, admin } = await authenticate.admin(request);
   const milestones = await getMilestones(session.shop);
+
+  // Auto-register the storefront script tag
+  await ensureScriptTag(admin).catch((err) =>
+    console.error("ScriptTag registration failed:", err),
+  );
+
   return json({ milestones });
 };
 
